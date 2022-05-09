@@ -5,6 +5,16 @@ import { buildSchema } from 'type-graphql'
 import { HelloWorldResolver } from './modules/hello-world/resolver'
 import { AppDataSource } from './data-source'
 import { RegisterResolver } from './modules/user'
+import connectRedis from 'connect-redis'
+import { createClient } from 'redis'
+import session from 'express-session'
+
+const RedisStore = connectRedis(session)
+
+const redisClient = createClient()
+
+redisClient.on('error', (err) => console.log('redis client error', err))
+redisClient.on('connect', () => console.log('redis client started'))
 
 async function main() {
     const app = express()
@@ -15,6 +25,22 @@ async function main() {
     const apolloServer = new ApolloServer({
         schema,
     })
+
+    await redisClient.connect()
+
+    app.use(
+        session({
+            store: new RedisStore({ client: redisClient }),
+            secret: 'I am secret',
+            resave: false,
+            saveUninitialized: false,
+            cookie: {
+                httpOnly: true,
+                secure: true,
+                maxAge: 189341556000, // 6 years
+            },
+        })
+    )
 
     try {
         await AppDataSource.initialize()
