@@ -34,7 +34,7 @@ async function main() {
             cookie: {
                 httpOnly: true,
                 secure: true,
-                maxAge: 189341556000, // 6 years
+                maxAge: 1000 * 60 * 60 * 24 * 365 * 7, // 7 years
             },
         })
     )
