@@ -23,9 +23,8 @@
         "noFallthroughCasesInSwitch": true,
         "skipLibCheck": true,
         "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "baseUrl": "./src"
+        "experimentalDecorators": true
     },
-    "include": ["src/**/*.ts", "src/*.ts"],
+    "include": ["./src"],
     "exclude": ["node_modules"]
 }
