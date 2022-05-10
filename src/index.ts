@@ -6,15 +6,13 @@ import { HelloWorldResolver } from './modules/hello-world/resolver'
 import { AppDataSource } from './data-source'
 import { RegisterResolver } from './modules/user'
 import connectRedis from 'connect-redis'
-import { createClient } from 'redis'
+import { redis } from './redis'
 import session from 'express-session'
 
 const RedisStore = connectRedis(session)
 
-const redisClient = createClient()
-
-redisClient.on('error', (err) => console.log('redis client error', err))
-redisClient.on('connect', () => console.log('redis client started'))
+redis.on('error', (err) => console.log('redis client error', err))
+redis.on('connect', () => console.log('redis client started'))
 
 async function main() {
     const app = express()
@@ -26,12 +24,11 @@ async function main() {
         schema,
     })
 
-    await redisClient.connect()
 
     app.use(
         session({
-            store: new RedisStore({ client: redisClient }),
             secret: 'I am secret',
+            store: new RedisStore({ client: redis }),
             resave: false,
             saveUninitialized: false,
             cookie: {
