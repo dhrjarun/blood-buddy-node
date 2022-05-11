@@ -4,7 +4,7 @@ import express from 'express'
 import { buildSchema } from 'type-graphql'
 import { HelloWorldResolver } from './modules/hello-world/resolver'
 import { AppDataSource } from './data-source'
-import { RegisterResolver, LoginResolver } from './modules/user'
+import { RegisterResolver, LoginResolver, LogoutResolver } from './modules/user'
 import connectRedis from 'connect-redis'
 import { redis } from './redis'
 import session from 'express-session'
@@ -21,6 +21,7 @@ async function main() {
             HelloWorldResolver,
             RegisterResolver,
             LoginResolver,
+            LogoutResolver,
         ],
     })
 
