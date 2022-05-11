@@ -20,7 +20,8 @@
         "noFallthroughCasesInSwitch": true,
         "skipLibCheck": true,
         "emitDecoratorMetadata": true,
-        "experimentalDecorators": true
+        "experimentalDecorators": true,
+        "typeRoots": ["./src/types", "./node_modules/@types"]
     },
     "include": ["./src"],
     "exclude": ["node_modules"]

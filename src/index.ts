@@ -4,7 +4,7 @@ import express from 'express'
 import { buildSchema } from 'type-graphql'
 import { HelloWorldResolver } from './modules/hello-world/resolver'
 import { AppDataSource } from './data-source'
-import { RegisterResolver } from './modules/user'
+import { RegisterResolver, LoginResolver } from './modules/user'
 import connectRedis from 'connect-redis'
 import { redis } from './redis'
 import session from 'express-session'
@@ -17,21 +17,29 @@ redis.on('connect', () => console.log('redis client started'))
 async function main() {
     const app = express()
     const schema = await buildSchema({
-        resolvers: [HelloWorldResolver, RegisterResolver],
+        resolvers: [
+            HelloWorldResolver,
+            RegisterResolver,
+            LoginResolver,
+        ],
     })
 
     const apolloServer = new ApolloServer({
         schema,
+        context: ({ req, res }) => ({ req, res }),
     })
 
+    app.set('trust proxy', process.env.NODE_ENV !== 'production') // because cookie is not getting stored in the browser
 
     app.use(
         session({
-            secret: 'I am secret',
             store: new RedisStore({ client: redis }),
+            name: 'userId',
+            secret: 'asdfaskvmlkvmlsmv',
             resave: false,
             saveUninitialized: false,
             cookie: {
+                sameSite: 'none',
                 httpOnly: true,
                 secure: true,
                 maxAge: 1000 * 60 * 60 * 24 * 365 * 7, // 7 years
@@ -47,7 +55,16 @@ async function main() {
     }
 
     await apolloServer.start()
-    apolloServer.applyMiddleware({ app })
+    apolloServer.applyMiddleware({
+        app,
+        cors: {
+            origin: ['https://studio.apollographql.com'],
+            credentials: true,
+            methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+            exposedHeaders: ['set-cookies', 'connection'],
+        },
+    })
+
     app.listen({ port: 4000 }, () => console.log('listening on port 4000'))
 }
 
